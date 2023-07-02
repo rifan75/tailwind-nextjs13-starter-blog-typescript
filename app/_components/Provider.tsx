@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import "../_css/tailwind.css";
 import "../_css/prism.css";
 import "katex/dist/katex.css";
@@ -21,7 +22,16 @@ export default function Provider({
 }: {
   children: React.ReactElement;
 }) {
-  console.log("Provider", children);
+  const [mounted, setMounted] = useState(false);
+
+  // useEffect only runs on the client, so now we can safely show the UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
   return (
     <ThemeProvider attribute="class" defaultTheme={siteMetadata.theme}>
       <Head>
@@ -30,7 +40,6 @@ export default function Provider({
       {isDevelopment && isSocket && <ClientReload />}
       <Analytics />
       <LayoutWrapper>{children}</LayoutWrapper>
-      {/* {children} */}
     </ThemeProvider>
   );
 }

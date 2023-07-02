@@ -2,28 +2,14 @@ import Link from "./_components/Link";
 import { PageSEO } from "./_components/SEO";
 import Tag from "./_components/Tag";
 import siteMetadata from "./_data/siteMetadata";
-import { getAllFilesFrontMatter, FrontMatter } from "./_lib/mdx";
+import { getAllFilesFrontMatter } from "./_lib/mdx";
 import formatDate from "./_lib/utils/formatDate";
-
 import NewsletterForm from "./_components/NewsletterForm";
 
 const MAX_DISPLAY = 5;
 
-interface IfrontMatter {
-  slug: string;
-  date: Date | string;
-  title: string;
-  summary: string;
-  tags: string[];
-}
-
-export async function getStaticProps() {
+export default async function Home() {
   const posts = await getAllFilesFrontMatter("blog");
-
-  return { props: { posts } };
-}
-
-export default function Home({ posts }: FrontMatter) {
   return (
     <>
       <PageSEO
@@ -41,7 +27,7 @@ export default function Home({ posts }: FrontMatter) {
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts?.length && "No posts found."}
-          {posts?.slice(0, MAX_DISPLAY).map((frontMatter: IfrontMatter) => {
+          {posts?.slice(0, MAX_DISPLAY).map((frontMatter) => {
             const { slug, date, title, summary, tags } = frontMatter;
             return (
               <li key={slug} className="py-12">
@@ -51,7 +37,7 @@ export default function Home({ posts }: FrontMatter) {
                       <dt className="sr-only">Published on</dt>
                       <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
                         <time dateTime={date as string}>
-                          {formatDate(date as Date)}
+                          {formatDate(date as unknown as Date)}
                         </time>
                       </dd>
                     </dl>

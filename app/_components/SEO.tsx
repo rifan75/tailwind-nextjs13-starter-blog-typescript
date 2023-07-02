@@ -3,12 +3,19 @@
 import Head from "next/head";
 import { usePathname } from "next/navigation";
 import siteMetadata from "../_data/siteMetadata";
+import { PostFrontMatter } from "../_types/PostFrontMatter";
+import { AuthorFrontMatter } from "../_types/AuthorFrontMatter";
 
 interface CommonSEOProps {
   title: string;
-  description: string;
-  ogImage: string | undefined | { url: string }[];
+  description: string | undefined;
   ogType: string;
+  ogImage:
+    | string
+    | {
+        "@type": string;
+        url: string;
+      }[];
   twImage: string;
   canonicalUrl?: string;
 }
@@ -18,17 +25,9 @@ interface ISEOProps {
   description: string;
 }
 
-interface IBlogSEOProps {
-  authorDetails: {
-    name: string;
-  }[];
-  title: string;
-  summary: string;
-  date: string;
-  lastmod: string;
+interface IBlogSEOProps extends PostFrontMatter {
+  authorDetails?: AuthorFrontMatter[];
   url: string;
-  images: string[];
-  canonicalUrl: string;
 }
 
 const CommonSEO = ({

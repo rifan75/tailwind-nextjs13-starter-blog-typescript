@@ -5,6 +5,9 @@ import path from "path";
 import readingTime from "reading-time";
 import getAllFilesRecursively from "./utils/files";
 import dynamic from "next/dynamic";
+import { PostFrontMatter } from "../_types/PostFrontMatter";
+import { AuthorFrontMatter } from "../_types/AuthorFrontMatter";
+import { Toc } from "../_types/Toc";
 // Remark packages
 import remarkGfm from "remark-gfm";
 import remarkFootnotes from "remark-footnotes";
@@ -13,40 +16,23 @@ import remarkExtractFrontmatter from "./remark-extract-frontmatter";
 import remarkCodeTitles from "./remark-code-title";
 import remarkTocHeadings from "./remark-toc-headings";
 import remarkImgToJsx from "./remark-img-to-jsx";
+import { BuildOptions } from "esbuild";
 // Rehype packages
-const rehypeCitation: any = dynamic(() => import("rehype-citation") as any, {
-  ssr: false,
-});
-const rehypeSlug: any = dynamic(() => import("rehype-slug") as any, {
-  ssr: false,
-});
+const rehypeCitation: any = dynamic(() => import("rehype-citation") as any);
+const rehypeSlug: any = dynamic(() => import("rehype-slug") as any);
 const rehypeAutolinkHeadings: any = dynamic(
-  () => import("rehype-autolink-headings") as any,
-  { ssr: false }
+  () => import("rehype-autolink-headings") as any
 );
-const rehypePrismPlus: any = dynamic(() => import("rehype-prism-plus") as any, {
-  ssr: false,
-});
-const rehypeKatex: any = dynamic(() => import("rehype-katex") as any, {
-  ssr: false,
-});
+const rehypePrismPlus: any = dynamic(() => import("rehype-prism-plus") as any);
+const rehypeKatex: any = dynamic(() => import("rehype-katex") as any);
 const rehypePresetMinify: any = dynamic(
-  () => import("rehype-preset-minify") as any,
-  {
-    ssr: false,
-  }
+  () => import("rehype-preset-minify") as any
 );
 
 const root = process.cwd();
 
-export interface FrontMatter {
-  [key: string]: any;
-  draft?: boolean;
-  date?: string | number | null;
-}
-
-export function getFiles(type: string) {
-  const prefixPaths = path.join(root, "data", type);
+export function getFiles(type: "blog" | "authors") {
+  const prefixPaths = path.join(root, "/app/_data", type);
   const files = getAllFilesRecursively(prefixPaths);
   // Only want to return blog/path and ignore root, replace is needed to work on Windows
   return files.map((file) =>
@@ -58,19 +44,21 @@ export function formatSlug(slug: string) {
   return slug.replace(/\.(mdx|md)/, "");
 }
 
-export function dateSortDesc(a: number, b: number) {
+export function dateSortDesc(a: string, b: string) {
   if (a > b) return -1;
   if (a < b) return 1;
   return 0;
 }
 
-export async function getFileBySlug(type: string, slug: string) {
-  const mdxPath = path.join(root, "data", type, `${slug}.mdx`);
-  const mdPath = path.join(root, "data", type, `${slug}.md`);
+export async function getFileBySlug<T>(
+  type: "authors" | "blog",
+  slug: string | string[]
+) {
+  const mdxPath = path.join(root, "/app/_data", type, `${slug}.mdx`);
+  const mdPath = path.join(root, "/app/_data", type, `${slug}.md`);
   const source = fs.existsSync(mdxPath)
     ? fs.readFileSync(mdxPath, "utf8")
     : fs.readFileSync(mdPath, "utf8");
-
   // https://github.com/kentcdodds/mdx-bundler#nextjs-esbuild-enoent
   if (process.platform === "win32") {
     process.env.ESBUILD_BINARY_PATH = path.join(
@@ -89,13 +77,13 @@ export async function getFileBySlug(type: string, slug: string) {
     );
   }
 
-  let toc: any = [];
+  let toc: Toc = [];
 
   const { code, frontmatter } = await bundleMDX({
     source,
     // mdx imports can be automatically source from the components directory
     cwd: path.join(root, "components"),
-    mdxOptions(options: any, frontmatter: any) {
+    mdxOptions(options) {
       // this is the recommended way to add custom remark/rehype plugins:
       // The syntax might look weird, but it protects you in case we add/remove
       // plugins in the future.
@@ -114,16 +102,16 @@ export async function getFileBySlug(type: string, slug: string) {
         rehypeSlug,
         rehypeAutolinkHeadings,
         rehypeKatex,
-        [rehypeCitation, { path: path.join(root, "data") }],
+        [rehypeCitation, { path: path.join(root, "_data") }],
         [rehypePrismPlus, { ignoreMissing: true }],
         rehypePresetMinify,
       ];
       return options;
     },
-    esbuildOptions: (options) => {
+    esbuildOptions: (options: BuildOptions) => {
       options.loader = {
         ...options.loader,
-        ".js": "jsx",
+        ".ts": "tsx",
       };
       return options;
     },
@@ -142,12 +130,11 @@ export async function getFileBySlug(type: string, slug: string) {
   };
 }
 
-export async function getAllFilesFrontMatter(folder: string) {
-  const prefixPaths = path.join(root, "data", folder);
-
+export async function getAllFilesFrontMatter(folder: "blog") {
+  const prefixPaths = path.join(root, "/app/_data", folder);
   const files = getAllFilesRecursively(prefixPaths);
 
-  const allFrontMatter: FrontMatter[] = [];
+  const allFrontMatter: PostFrontMatter[] = [];
 
   files.forEach((file) => {
     // Replace is needed to work on Windows
@@ -157,19 +144,16 @@ export async function getAllFilesFrontMatter(folder: string) {
       return;
     }
     const source = fs.readFileSync(file, "utf8");
-    const { data: frontmatter } = matter(source);
-    if (frontmatter.draft !== true) {
+    const matterFile = matter(source);
+    const frontmatter = matterFile.data as AuthorFrontMatter | PostFrontMatter;
+    if ("draft" in frontmatter && frontmatter.draft !== true) {
       allFrontMatter.push({
         ...frontmatter,
         slug: formatSlug(fileName),
-        date: frontmatter.date
-          ? new Date(frontmatter.date).toISOString()
-          : null,
+        date: frontmatter.date ? new Date(frontmatter.date).toISOString() : "",
       });
     }
   });
 
-  return allFrontMatter.sort((a, b) =>
-    dateSortDesc(a.date as number, b.date as number)
-  );
+  return allFrontMatter.sort((a, b) => dateSortDesc(a.date, b.date));
 }

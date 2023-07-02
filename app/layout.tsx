@@ -53,7 +53,8 @@ export default function RootLayout({
         />
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       </head>
-      <body className="bg-white text-black antialiased dark:bg-gray-900 dark:text-white">
+      {/* <body className="bg-white text-black antialiased dark:bg-gray-900 dark:text-white"> */}
+      <body className="bg-white text-black  dark:bg-gray-900 dark:text-white">
         <Provider>{children}</Provider>
       </body>
     </html>

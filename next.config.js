@@ -72,7 +72,10 @@ const nextConfig = withBundleAnalyzer({
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.(".svg")
     );
-
+    config.externals.push({
+      "utf-8-validate": "commonjs utf-8-validate",
+      bufferutil: "commonjs bufferutil",
+    });
     config.module.rules.push(
       // Reapply the existing rule, but only for svg imports ending in ?url
       {
@@ -93,6 +96,9 @@ const nextConfig = withBundleAnalyzer({
     fileLoaderRule.exclude = /\.svg$/i;
 
     return config;
+  },
+  compiler: {
+    removeConsole: false,
   },
 });
 
