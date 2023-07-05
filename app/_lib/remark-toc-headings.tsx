@@ -1,11 +1,7 @@
-import dynamic from "next/dynamic";
 import { slug } from "github-slugger";
 import { toString } from "mdast-util-to-string";
 import { Node } from "unist";
-
-const visit: any = dynamic(() => import("unist-util-visit") as any, {
-  ssr: false,
-});
+import {visit} from 'unist-util-visit'
 
 interface ExportRef {
   value: string;

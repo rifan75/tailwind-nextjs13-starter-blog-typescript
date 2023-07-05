@@ -1,3 +1,4 @@
+"use client"
 import Link from "../_components/Link";
 import Tag from "../_components/Tag";
 import { ComponentProps, useState } from "react";

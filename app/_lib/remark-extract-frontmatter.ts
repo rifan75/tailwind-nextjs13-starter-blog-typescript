@@ -2,10 +2,7 @@ import dynamic from "next/dynamic";
 import { load } from "js-yaml";
 import { Node } from "unist";
 import { VFile } from "vfile";
-
-const visit: any = dynamic(() => import("unist-util-visit") as any, {
-  ssr: false,
-});
+import {visit} from 'unist-util-visit'
 
 export default function extractFrontmatter() {
   return (tree: Node, file: VFile) => {

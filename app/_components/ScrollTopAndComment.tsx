@@ -1,3 +1,4 @@
+"use client"
 import siteMetadata from "../_data/siteMetadata";
 import { useEffect, useState } from "react";
 

@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import "../_css/tailwind.css";
-import "../_css/prism.css";
-import "katex/dist/katex.css";
+
 
 import "@fontsource/inter/latin.css";
 

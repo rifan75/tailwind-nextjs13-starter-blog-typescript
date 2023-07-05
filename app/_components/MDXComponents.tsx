@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 "use client";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { getMDXComponent } from "mdx-bundler/client";
 import Image from "./Image";
 import CustomLink from "./Link";
@@ -8,18 +8,24 @@ import TOCInline from "./TOCInline";
 import Pre from "./Pre";
 import { BlogNewsletterForm } from "./NewsletterForm";
 
-type MDXComponents = import("mdx/types").MDXComponents;
+type MDXComponentsType = import("mdx/types").MDXComponents;
 
-export const MDXComponents: MDXComponents = {
+export const MDXComponents: MDXComponentsType = {
+  //code
   Image,
   TOCInline,
   a: CustomLink,
   pre: Pre,
-  wrapper: ({ layout, ...rest }: { layout: string }) => {
+  BlogNewsletterForm: BlogNewsletterForm,
+  wrapper: ({
+    layout,
+    ...rest
+  }: {
+    layout: string;
+  }) => {
     const Layout = require(`../_layouts/${layout}`).default;
     return <Layout {...rest} />;
   },
-  BlogNewsletterForm: BlogNewsletterForm,
 };
 
 interface Iprops {

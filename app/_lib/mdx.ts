@@ -4,30 +4,23 @@ import matter from "gray-matter";
 import path from "path";
 import readingTime from "reading-time";
 import getAllFilesRecursively from "./utils/files";
-import dynamic from "next/dynamic";
 import { PostFrontMatter } from "../_types/PostFrontMatter";
 import { AuthorFrontMatter } from "../_types/AuthorFrontMatter";
 import { Toc } from "../_types/Toc";
-// Remark packages
+import { BuildOptions } from "esbuild";
 import remarkGfm from "remark-gfm";
-import remarkFootnotes from "remark-footnotes";
 import remarkMath from "remark-math";
+import remarkFootnotes from "remark-footnotes";
+import remarkTocHeadings from "./remark-toc-headings";
 import remarkExtractFrontmatter from "./remark-extract-frontmatter";
 import remarkCodeTitles from "./remark-code-title";
-import remarkTocHeadings from "./remark-toc-headings";
 import remarkImgToJsx from "./remark-img-to-jsx";
-import { BuildOptions } from "esbuild";
-// Rehype packages
-const rehypeCitation: any = dynamic(() => import("rehype-citation") as any);
-const rehypeSlug: any = dynamic(() => import("rehype-slug") as any);
-const rehypeAutolinkHeadings: any = dynamic(
-  () => import("rehype-autolink-headings") as any
-);
-const rehypePrismPlus: any = dynamic(() => import("rehype-prism-plus") as any);
-const rehypeKatex: any = dynamic(() => import("rehype-katex") as any);
-const rehypePresetMinify: any = dynamic(
-  () => import("rehype-preset-minify") as any
-);
+import rehypeSlug from "rehype-slug";
+// import rehypeCitation from 'rehype-citation'
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypePrismPlus from "rehype-prism-plus";
+import rehypeKatex from "rehype-katex";
+// import rehypePresetMinify from "rehype-preset-minify";
 
 const root = process.cwd();
 
@@ -82,8 +75,8 @@ export async function getFileBySlug<T>(
   const { code, frontmatter } = await bundleMDX({
     source,
     // mdx imports can be automatically source from the components directory
-    cwd: path.join(root, "components"),
-    mdxOptions(options) {
+    cwd: path.join(root, "app/_components"),
+    mdxOptions(options, frontmatter) {
       // this is the recommended way to add custom remark/rehype plugins:
       // The syntax might look weird, but it protects you in case we add/remove
       // plugins in the future.
@@ -102,16 +95,14 @@ export async function getFileBySlug<T>(
         rehypeSlug,
         rehypeAutolinkHeadings,
         rehypeKatex,
-        [rehypeCitation, { path: path.join(root, "_data") }],
         [rehypePrismPlus, { ignoreMissing: true }],
-        rehypePresetMinify,
       ];
       return options;
     },
     esbuildOptions: (options: BuildOptions) => {
       options.loader = {
         ...options.loader,
-        ".ts": "tsx",
+        ".tsx": "jsx",
       };
       return options;
     },
@@ -126,6 +117,9 @@ export async function getFileBySlug<T>(
       fileName: fs.existsSync(mdxPath) ? `${slug}.mdx` : `${slug}.md`,
       ...frontmatter,
       date: frontmatter.date ? new Date(frontmatter.date).toISOString() : null,
+      authors: frontmatter.authors,
+      draft: frontmatter.draft ?? false,
+      layout: frontmatter.layout,
     },
   };
 }

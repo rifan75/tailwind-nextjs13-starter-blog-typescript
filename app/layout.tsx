@@ -1,4 +1,6 @@
 import "./globals.css";
+import "./_css/prism.css";
+import "katex/dist/katex.css";
 import { Inter } from "next/font/google";
 import Provider from "./_components/Provider";
 

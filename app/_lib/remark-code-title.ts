@@ -1,9 +1,5 @@
 import dynamic from "next/dynamic";
-
-const visit: any = dynamic(() => import("unist-util-visit") as any, {
-  ssr: false,
-});
-
+import {visit} from 'unist-util-visit'
 import { Node } from "unist";
 
 interface ItitleNode {

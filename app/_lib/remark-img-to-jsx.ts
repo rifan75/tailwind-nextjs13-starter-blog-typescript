@@ -2,10 +2,7 @@ import dynamic from "next/dynamic";
 import sizeOf from "image-size";
 import fs from "fs";
 import { Node } from "unist";
-
-const visit: any = dynamic(() => import("unist-util-visit") as any, {
-  ssr: false,
-});
+import {visit} from 'unist-util-visit'
 
 interface ImageNode extends Node {
   attributes: (

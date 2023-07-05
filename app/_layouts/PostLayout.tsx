@@ -8,7 +8,7 @@ import siteMetadata from "../_data/siteMetadata";
 import Comments from "../_components/comments";
 import ScrollTopAndComment from "../_components/ScrollTopAndComment";
 import { PostFrontMatter } from "../_types/PostFrontMatter";
-import { ReactNode } from "react";
+import { Component, ReactNode } from "react";
 import { AuthorFrontMatter } from "../_types/AuthorFrontMatter";
 
 const editUrl = (fileName: string) =>
@@ -41,7 +41,7 @@ export default function PostLayout({
   children,
 }: Iprops) {
   const { slug, fileName, date, title, images, tags } = frontMatter;
-
+  console.log("children", children);
   return (
     <SectionContainer>
       <BlogSEO
@@ -120,9 +120,7 @@ export default function PostLayout({
               </dd>
             </dl>
             <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
-              <div className="prose max-w-none pt-10 pb-8 dark:prose-dark">
-                {children}
-              </div>
+              <div className="prose max-w-none pt-10 pb-8 dark:prose-dark">{children}</div>
               <div className="pt-6 pb-6 text-sm text-gray-700 dark:text-gray-300">
                 <Link href={discussUrl(slug)} rel="nofollow">
                   {"Discuss on Twitter"}
